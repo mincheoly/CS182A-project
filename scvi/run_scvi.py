@@ -27,11 +27,11 @@ if __name__ == '__main__':
     output = args.output
 
     adata = sc.read(filename)
+    print(adata.shape)
 
     scvi.model.SCVI.setup_anndata(
         adata,
         layer="counts",
-        categorical_covariate_keys=['tp'],
         continuous_covariate_keys=["pct_counts_mt"],
     )
     
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     model.train()
     
     latent = model.get_latent_representation()
-    model.save(output + "model_{}_{}/".format(num_hidden, num_latent))
+    model.save(output + "model_{}_{}/".format(num_hidden, num_latent), overwrite=True)
     pd.DataFrame(latent).to_csv(output + 'latent_{}_{}.csv'.format(num_hidden, num_latent))
     
     

@@ -54,13 +54,13 @@ if __name__ == '__main__':
     
     # Read and normalize anndata
     adata = sc.read(h5ad_path)
-    adata = adata[adata.obs['tp'] == '3hr'].copy()
 
     normalize(adata)
     num_genes = adata.shape[1]
     
     # Read the cell state matrix
-    cell_state_matrix = pd.read_csv(latent_path).values
+    if latent_path is not None:
+        cell_state_matrix = pd.read_csv(latent_path).values
     design_matrix = pd.read_csv(design_path, index_col=0)
     guide_list = design_matrix.columns.tolist()
     num_guides = len(guide_list)
@@ -77,8 +77,12 @@ if __name__ == '__main__':
         start = num_genes_in_chunk*chunk
         end = start+num_genes_in_chunk
         y = expr[:, start:end].toarray()
-        cell_state_model = lm.LinearRegression(n_jobs=5).fit(cell_state_matrix,y)
-        y_partial = y-cell_state_model.predict(cell_state_matrix)
+        
+        if latent_path is None:
+            y_partial = y
+        else:
+            cell_state_model = lm.LinearRegression(n_jobs=5).fit(cell_state_matrix,y)
+            y_partial = y-cell_state_model.predict(cell_state_matrix)
 
         beta = corr2_coeff(design_matrix.values.T, y_partial.T).T
 

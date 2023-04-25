@@ -6,6 +6,7 @@ import scipy.sparse as sparse
 import scipy.stats as stats
 import sklearn.linear_model as lm
 import sklearn.metrics as metrics
+from sklearn.decomposition import PCA
 import itertools
 import seaborn as sns
 
@@ -60,14 +61,13 @@ if __name__ == '__main__':
     
     # Read the cell state matrix
     if latent_path is not None:
-        cell_state_matrix = pd.read_csv(latent_path).values
+        cell_state_matrix = pd.read_csv(latent_path, index_col=0).values
     design_matrix = pd.read_csv(design_path, index_col=0)
     guide_list = design_matrix.columns.tolist()
     num_guides = len(guide_list)
     
     # Converting all genes to dense is too memory intensive
     num_genes_in_chunk = 1000
-    num_states = 5
     num_chunks = int(num_genes/num_genes_in_chunk)+1
     expr = adata.X
     
